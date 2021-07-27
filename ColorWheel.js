@@ -25,7 +25,7 @@ export class ColorWheel extends Component {
       currentColor: props.initialColor,
       pan: new Animated.ValueXY(),
       radius: 0,
-      customColor: props.customColor || ["FFF1DF", "FFFFFF", "C8F8FF"],
+      customColor: props.customColor || ["#FFF1DF", "#FFFFFF", "#C8F8FF"],
       mode: props.mode || "NORMAL"
 
     }
@@ -177,7 +177,7 @@ export class ColorWheel extends Component {
 
     if (this.props.mode === "CUSTOM" && this.props.customColor){
       const customColorPercentage = verticalPercentage<0.5?verticalPercentage*2:(verticalPercentage-0.5)*2;
-      const customTargetColors = verticalPercentage<0.5?[this.props.customColor[0], this.props.customColor[1]]:[this.props.customColor[1], this.props.customColor[2]];
+      const customTargetColors = verticalPercentage<0.5?[this.props.customColor[0].replace("#", ""), this.props.customColor[1].replace("#", "")]:[this.props.customColor[1].replace("#", ""), this.props.customColor[2].replace("#", "")];
       const customColor = "#"+this.interpolateColor(customTargetColors[0], customTargetColors[1], customColorPercentage);
       this.setState({hsv:colorsys.hex2Hsv(customColor), currentColor:customColor})
     }else{

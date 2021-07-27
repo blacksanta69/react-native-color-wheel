@@ -18,6 +18,9 @@ const Example = ({onChange}) => (
       onColorChangeComplete={color => onChange(color)}
       style={{width: Dimensions.get('window').width}}
       thumbStyle={{ height: 30, width: 30, borderRadius: 30}}
+      mode={stateColorMode}
+      customColor={['FFF1DF', 'FFFFFF', 'C8F8FF']}
+      src={colorWheelTemperature}
     />
     <ColorWheel
       initialColor="#00ee00"
@@ -36,6 +39,9 @@ const Example = ({onChange}) => (
 | `onColorChangeComplete` | Callback on mouseup or drag event has finished | func   |
 | `thumbSize`             | Width of draggable thumb                       | Number |
 | `thumbStyle`            | CSS for the draggable thumb                    | Object |
+| `src`                   | The path of a custom image to use              | Object |
+| `customColor`           | Three HEX Values to use as a custom Gradient   | Array  |
+| `mode`                  | "CUSTOM" or "NORMAL" - "NORMAL" by default     | String |
 
 <img alt="demo screenshot" src="screenshot.png" width="350" />
 
