@@ -1,13 +1,13 @@
 // @flow
 
-import React, {Component} from 'react'
+import React, {Component, useRef} from 'react'
 import {
   Animated,
   Image,
   Dimensions,
   PanResponder,
   StyleSheet,
-  View,
+  View,Text,
 } from 'react-native'
 import colorsys from 'colorsys'
 
@@ -25,9 +25,18 @@ export class ColorWheel extends Component {
       currentColor: props.initialColor,
       pan: new Animated.ValueXY(),
       radius: 0,
+      customColor: props.customColor || ["FFF1DF", "FFFFFF", "C8F8FF"],
+      mode: props.mode || "NORMAL"
+
+    }
+
+    this.imageRef = React.createRef();
+  }
+  componentDidUpdate(prevProps) {
+    if (prevProps.initialColor !== this.props.initialColor){
+      this.setState({currentColor: this.props.initialColor})
     }
   }
-
   componentDidMount = () => {
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponderCapture: ({nativeEvent}) => {
@@ -113,10 +122,13 @@ export class ColorWheel extends Component {
     } = gestureState
     const [x, y] = [pageX || moveX, pageY || moveY]
     const [dx, dy] = [x - this.state.offset.x, y - this.state.offset.y]
+
+
     return {
       deg: Math.atan2(dy, dx) * (-180 / Math.PI),
       // pitagoras r^2 = x^2 + y^2 normalized
       radius: Math.sqrt(dy * dy + dx * dx) / this.state.radius,
+      position:{x:dx, y:dy}
     }
   }
 
@@ -148,13 +160,32 @@ export class ColorWheel extends Component {
       top: this.state.height / 2 - y,
     }
   }
-
+   interpolateColor = (c0, c1, f) => {
+      c0 = c0.match(/.{1,2}/g).map((oct)=>parseInt(oct, 16) * (1-f))
+      c1 = c1.match(/.{1,2}/g).map((oct)=>parseInt(oct, 16) * f)
+      let ci = [0,1,2].map(i => Math.min(Math.round(c0[i]+c1[i]), 255))
+      return ci.reduce((a,v) => ((a << 8) + v), 0).toString(16).padStart(6, "0")
+  }
   updateColor = ({nativeEvent}) => {
-    const {deg, radius} = this.calcPolar(nativeEvent)
+    const {deg, radius, position} = this.calcPolar(nativeEvent)
+
+
+    const wheelDiameter = this.state.radius * 2 - this.props.thumbSize;
+    const verticalPercentage =Math.min(1,Math.max(0,(position.y + wheelDiameter/2)/wheelDiameter));
     const hsv = {h: deg, s: 100 * radius, v: 100};
     const currentColor = colorsys.hsv2Hex(hsv)
-    this.setState({hsv, currentColor})
+
+    if (this.props.mode === "CUSTOM" && this.props.customColor){
+      const customColorPercentage = verticalPercentage<0.5?verticalPercentage*2:(verticalPercentage-0.5)*2;
+      const customTargetColors = verticalPercentage<0.5?[this.props.customColor[0], this.props.customColor[1]]:[this.props.customColor[1], this.props.customColor[2]];
+      const customColor = "#"+this.interpolateColor(customTargetColors[0], customTargetColors[1], customColorPercentage);
+      this.setState({hsv:colorsys.hex2Hsv(customColor), currentColor:customColor})
+    }else{
+      this.setState({hsv, currentColor})
+
+    }
     this.props.onColorChange(hsv);
+
   }
 
   forceUpdate = color => {
@@ -182,6 +213,7 @@ export class ColorWheel extends Component {
   }
 
   render () {
+
     const {radius} = this.state
     const thumbStyle = [
       styles.circle,
@@ -196,7 +228,6 @@ export class ColorWheel extends Component {
     ]
 
     const panHandlers = this._panResponder && this._panResponder.panHandlers || {}
-
     return (
       <View
         ref={node => {
@@ -206,12 +237,13 @@ export class ColorWheel extends Component {
         onLayout={nativeEvent => this.onLayout(nativeEvent)}
         style={[styles.coverResponder, this.props.style]}>
         <Image
-          style={[styles.img, 
+          ref={this.imageRef}
+          style={[styles.img,
                   {
                     height: radius * 2 - this.props.thumbSize,
                     width: radius * 2 - this.props.thumbSize
                   }]}
-          source={require('./color-wheel.png')}
+          source={ this.props.mode === "CUSTOM"? this.props.src: require('./color-wheel.png')}
         />
         <Animated.View style={[this.state.pan.getLayout(), thumbStyle]} />
       </View>
