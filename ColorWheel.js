@@ -34,12 +34,16 @@ export class ColorWheel extends Component {
   }
   componentDidUpdate(prevProps) {
     if (prevProps.initialColor !== this.props.initialColor){
-      this.setState({currentColor: this.props.initialColor})
+      console.log("componentDidUpdate onColorChange" );
+      this.setState({currentColor: this.props.initialColor});
+        this.measureOffset();
     }
   }
   componentDidMount = () => {
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponderCapture: ({nativeEvent}) => {
+        this.measureOffset();
+        console.log("onStartShouldSetPanResponderCapture",nativeEvent.pageX,nativeEvent.pageY );
         if (this.outBounds(nativeEvent)) return
         this.updateColor({nativeEvent})
         this.setState({panHandlerReady: true})
@@ -80,6 +84,7 @@ export class ColorWheel extends Component {
         if (this.props.onColorChangeComplete) {
           this.props.onColorChangeComplete(this.state.hsv);
         }
+
       },
     })
   }
@@ -253,7 +258,7 @@ export class ColorWheel extends Component {
 
 const styles = StyleSheet.create({
   coverResponder: {
-    flex: 1,
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
