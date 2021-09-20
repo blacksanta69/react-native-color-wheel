@@ -69,7 +69,8 @@ export class ColorWheel extends Component {
               dy: this.state.pan.y,
             },
           ],
-          {listener: this.updateColor}
+          {listener: this.updateColor,
+            useNativeDriver:false}
         )(event, gestureState)
       },
       onMoveShouldSetPanResponder: () => true,
@@ -100,6 +101,9 @@ export class ColorWheel extends Component {
     * x and y are the distances to its previous element
     * but in measureInWindow they are relative to the window
     */
+    if (!this.self){
+      return;
+    }
     this.self.measureInWindow((x, y, width, height) => {
       const window = Dimensions.get('window')
       const absX = x % width
@@ -210,6 +214,7 @@ export class ColorWheel extends Component {
     this.setState({currentColor: color})
     this.props.onColorChange({h, s, v})
     Animated.spring(this.state.pan, {
+      useNativeDriver:true,
       toValue: {
         x: left - this.props.thumbSize / 2,
         y: top - this.props.thumbSize / 2,
@@ -250,7 +255,7 @@ export class ColorWheel extends Component {
                   }]}
           source={ this.props.mode === "CUSTOM"? this.props.src: require('./color-wheel.png')}
         />
-        <Animated.View style={[this.state.pan.getLayout(), thumbStyle]} />
+        <Animated.View  style={[this.state.pan.getLayout(), thumbStyle]} />
       </View>
     )
   }
