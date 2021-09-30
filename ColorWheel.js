@@ -27,9 +27,12 @@ export class ColorWheel extends Component {
       pan: new Animated.ValueXY(),
       radius: 0,
       customColor: props.customColor || ["#FFF1DF", "#FFFFFF", "#C8F8FF"],
-      mode: props.mode || "NORMAL"
+      mode: props.mode || "NORMAL",
     };
 
+    props.setStateColorWheelCallback({onScroll:(e)=>{
+       this.measureOffset();
+     }})
     this.imageRef = React.createRef();
   }
   componentDidUpdate(prevProps) {
@@ -93,6 +96,7 @@ export class ColorWheel extends Component {
   };
 
   onLayout() {
+    console.log("onLayout");
     this.measureOffset();
   }
 
@@ -114,7 +118,6 @@ export class ColorWheel extends Component {
         x: absX + width / 2,
         y: (y % window.height) + height / 2
       };
-
       this.setState({
         offset,
         radius,
