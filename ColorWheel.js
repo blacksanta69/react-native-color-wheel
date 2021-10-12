@@ -221,6 +221,9 @@ export class ColorWheel extends Component {
   };
 
   forceUpdate = color => {
+    if (this.props.mode === "CUSTOM" && this.props.customColor) {
+      return;
+    }
     const { h, s, v } = colorsys.hex2Hsv(color);
     const { left, top } = this.calcCartesian(h, s / 100);
     this.setState({ currentColor: color });
